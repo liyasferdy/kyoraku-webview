@@ -9,7 +9,9 @@ import {
   Tooltip,
 } from "chart.js";
 import { Inter } from "next/font/google";
-import { useEffect, useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { RangeCalendar } from "@heroui/react";
+import { today, getLocalTimeZone } from "@internationalized/date";
 
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip);
 
@@ -59,6 +61,10 @@ export default function Summary({ onClose }) {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [range, setRange] = useState(null);
+  const [tempRange, setTempRange] = useState(null); // selecting
+  const wrapperRef = useRef(null);
 
   useEffect(() => {
     const fetchSummary = async () => {
@@ -85,6 +91,61 @@ export default function Summary({ onClose }) {
     fetchSummary();
   }, []);
 
+  // close when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleToday = () => {
+    const t = today(getLocalTimeZone());
+
+    setTempRange({
+      start: t,
+      end: t,
+    });
+  };
+
+  const handleApply = () => {
+    setRange(tempRange);
+    setOpen(false);
+  };
+
+  // Format Date
+  const formatDate = (dateObj) => {
+    if (!dateObj) return "Date";
+
+    const jsDate = new Date(dateObj.year, dateObj.month - 1, dateObj.day);
+
+    return jsDate.toLocaleDateString("en-GB", {
+      weekday: "long",
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    });
+  };
+
+  // Label for Date picker
+  const isSameDate = (a, b) => {
+    if (!a || !b) return false;
+
+    return a.year === b.year && a.month === b.month && a.day === b.day;
+  };
+
+  const label = range
+    ? isSameDate(range.start, range.end)
+      ? formatDate(range.start)
+      : `${formatDate(range.start)} - ${formatDate(range.end)}`
+    : tempRange
+      ? "Selecting..."
+      : formatDate(today(getLocalTimeZone()));
+
+  // Charts configuration
   const chartData = {
     labels: ngVisualChart.labels,
     datasets: [
@@ -143,6 +204,77 @@ export default function Summary({ onClose }) {
           ⚠️ {error}
         </div>
       )}
+
+      {/* Filter row */}
+      <div className="relative" ref={wrapperRef}>
+        {/* Date row */}
+        <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 border-b border-gray-200">
+          <div className="px-3 py-1 space-x-2 rounded text-sm font-semibold">
+            <button
+              onClick={() => setOpen(!open)}
+              className="text-2xl border border-gray-300 rounded px-3 py-1 bg-white"
+            >
+              {label}
+            </button>
+          </div>
+        </div>
+
+        {/* Calendar Popup */}
+        {open && (
+          <div className="absolute mt-2 bg-white shadow-lg border rounded-xl z-9999 p-4">
+            {/* Dynamic Button */}
+            <div className="flex justify-end mb-2">
+              {tempRange ? (
+                <button
+                  onClick={handleApply}
+                  className="text-lg bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                >
+                  Apply
+                </button>
+              ) : (
+                <button
+                  onClick={handleToday}
+                  className="text-lg bg-rose-500 text-white px-3 py-1 rounded hover:bg-rose-600"
+                >
+                  Today
+                </button>
+              )}
+            </div>
+
+            <RangeCalendar
+              aria-label="Select date range"
+              firstDayOfWeek="mon"
+              value={tempRange}
+              onChange={setTempRange}
+              classNames={{
+                base: "p-4",
+                header: "mb-2",
+                title: "text-lg font-semibold",
+                gridHeader: "text-sm",
+                cell: "w-12 h-12 text-base", // 🔥 THIS controls size
+              }}
+            >
+              <RangeCalendar.Header>
+                <RangeCalendar.Heading />
+                <RangeCalendar.NavButton slot="previous" />
+                <RangeCalendar.NavButton slot="next" />
+              </RangeCalendar.Header>
+
+              <RangeCalendar.Grid>
+                <RangeCalendar.GridHeader>
+                  {(day) => (
+                    <RangeCalendar.HeaderCell>{day}</RangeCalendar.HeaderCell>
+                  )}
+                </RangeCalendar.GridHeader>
+
+                <RangeCalendar.GridBody>
+                  {(date) => <RangeCalendar.Cell date={date} />}
+                </RangeCalendar.GridBody>
+              </RangeCalendar.Grid>
+            </RangeCalendar>
+          </div>
+        )}
+      </div>
 
       {/* Stat Cards */}
       <div className="grid grid-cols-4 gap-3 p-4">

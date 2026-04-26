@@ -11,6 +11,7 @@
   "dependencies": {
     "@heroui/react": "^3.0.3",
     "@heroui/styles": "^3.0.3",
+    "@internationalized/date": "^3.12.1",
     "chart.js": "^4.5.1",
     "mysql2": "^3.22.2",
     "next": "16.2.4",
