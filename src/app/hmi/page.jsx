@@ -57,7 +57,7 @@ export default function HmiWebview() {
       >
         <iframe
           // src="https://d10e0aa11bf48c04.p16.rt3.io/webvisu.htm"
-          src="192.168.20.52:8080/webvisu.htm" //IP static from local server
+          src="https://192.168.20.52:8080/webvisu.htm" //IP static from local server
           className="w-full h-full border-0"
           title="HMI WebVisu"
         />

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -12,16 +13,43 @@ const navLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [time, setTime] = useState("");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+
+      const formatted = now.toLocaleString("en-GB", {
+        weekday: "long",
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Jakarta",
+      });
+
+      setTime(formatted + " WIB");
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <nav
       className="
-  fixed top-0 left-0 w-full
-  bg-white
-  px-6 py-8
-  flex items-center justify-between
-  z-9999
-"
+    fixed top-0 left-0 w-full
+    bg-white
+    px-6
+    h-25   
+    flex items-center justify-between
+    z-9999
+  "
     >
       {/* Logo */}
       <Link href="/" className=" text-lg tracking-tight">
@@ -60,12 +88,9 @@ export default function Navbar() {
       </div>
 
       {/* Right side */}
-      {/* <div className="flex items-center gap-3">
-        <span className="text-sm text-gray-400">teriot</span>
-        <button className="bg-red-600 hover:bg-red-700 text-white text-sm px-3 py-1.5 rounded-md transition-colors">
-          Logout
-        </button>
-      </div> */}
+      <div className="bg-rose-600 h-full flex items-center px-6">
+        <span className="text-xl font-mono text-white">{time}</span>
+      </div>
     </nav>
   );
 }
