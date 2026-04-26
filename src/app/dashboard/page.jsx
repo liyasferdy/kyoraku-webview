@@ -31,10 +31,10 @@ const STAT_COLORS = {
 };
 
 const MACHINES = [
-  { key: "AE060650-1780P", label: "AE060650-1780P" },
-  { key: "AE060650-1551", label: "AE060650-1551" },
-  { key: "AE060650-1780", label: "AE060650-1780" },
-  { key: "MACHINE 4", label: "MACHINE 4" },
+  { key: "500758", label: "500758" },
+  { key: "500867", label: "500867" },
+  { key: "500867P", label: "500867P" },
+  { key: "500804", label: "500804" },
 ];
 
 // Build stat rows for a given machine key from API summary
